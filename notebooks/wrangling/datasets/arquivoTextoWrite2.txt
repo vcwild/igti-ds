@@ -1,0 +1,1 @@
+Abri o arquivo ./datasets/arquivoTextoWrite2.txt em modo de escrita!--> Hoje é: 28/07/2020, 14:48:13
