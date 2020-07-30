@@ -1,0 +1,126 @@
+---
+title: "Coleta de Dados no MySQL utilizando o R"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+
+```{r}
+if(!"RMariaDB" %in% (.packages())){require(RMariaDB)}
+if(!"xlsx" %in% (.packages())){require(xlsx)}
+```
+
+## Carregando as tabelas
+
+```{r}
+con <- dbConnect(MariaDB(), user = 'root', password = 'igti', dbname = 'bootcamp', host = 'localhost', serverTimezone = 'UTC')
+tables <- dbListTables(con)
+tables
+```
+
+## Listando dados de uma tabela
+
+```{r}
+estados <- dbReadTable(con, 'estado')
+colnames(estados)
+```
+
+```{r}
+cidades <- dbReadTable(con, 'cidade')
+colnames(cidades)
+```
+
+```{r}
+imoveis <- dbReadTable(con, 'imovel')
+colnames(imoveis)
+```
+
+```{r}
+unidades <- dbReadTable(con, 'tipounidade')
+unidades
+```
+## Criando uma Query direto no banco de dados
+
+```{r}
+query <- "INSERT INTO tipounidade(idTipoUnidade, dscTipoUnidade) VALUES(7, 'Loft');"
+
+results <- dbSendQuery(con, query)
+results
+dbClearResult(results)
+```
+
+### Método alternativo
+
+```{r}
+id <- 8
+description <- 'Chácara'
+
+query <- paste("INSERT INTO tipounidade(idTipoUnidade, dscTipoUnidade) VALUES(",id,", '",description,"');", sep='')
+
+# Enviar resultado e retornar resposta
+results <- dbSendQuery(con, query)
+results
+dbClearResult(results)
+```
+
+```{r}
+unidades <- dbReadTable(con, 'tipounidade')
+unidades
+```
+
+## Escrevendo na tabela
+
+```{r}
+path <- './datasets/'
+filename <- paste(path, "estados.xlsx",sep='')
+insertdata <- read.xlsx(filename, sheetIndex = 1, header = TRUE, encoding = 'UTF-8')
+insertdata
+```
+
+```{r}
+dbWriteTable(con, 'estado', insertdata, append = TRUE)
+estados <- dbReadTable(con, 'estado')
+estados
+```
+
+```{r}
+query <- "SELECT * FROM estado;"
+
+# Retorna apenas resultados
+results <- dbGetQuery(con, query)
+results
+```
+
+## Exportar CSV
+
+```{r}
+write.csv(results, './datasets/estadosDB.csv', row.names = FALSE, quote = FALSE)
+```
+
+## Escrever uma tabela vazia
+
+```{r}
+query <- "CREATE TABLE caracteristicasgerais(
+    idcaracteristicasGerais int NOT NULL AUTO_INCREMENT,
+    dsccaracteristicasGerais varchar(150) NOT NULL,
+    PRIMARY KEY (idcaracteristicasGerais));"
+
+results <- dbSendQuery(con, query)
+results
+```
+
+```{r}
+tables <- dbListTables(con)
+tables
+```
+
+## Desconectar do Banco de Dados
+
+```{r}
+dbDisconnect(con)
+```
+
