@@ -1,0 +1,86 @@
+---
+title: "Acesso MongoDB"
+output: html_notebook
+---
+
+```{r}
+# install.packages("mongolite")
+require(mongolite)
+require(datasets)
+```
+
+```{r}
+connection <- mongo(collection = "megasena", db = "igti", url = "mongodb://localhost")
+
+```
+
+```{r}
+query <- connection$find('{"Ganhadores_Sena": "1"}')
+```
+
+```{r}
+exam_scores <- query[c("Rateio_Sena")]
+summary(exam_scores)
+```
+
+## Escrever o dataset iris no MongoDB
+
+```{r}
+connection <- mongo(collection = "iris", db = "igti", url = "mongodb://localhost")
+```
+
+```{r}
+connection$insert(iris)
+```
+
+```{r}
+connection$find(limit = 5)
+```
+
+```{r}
+pessoas <- mongo(collection = "pessoas", db = "igti", url = "mongodb://localhost")
+jsonObject <- c(
+    '{"nome": "Maria"}',
+    '{"nome": "Ana", "idade": 23}',
+    '{"nome": "João"}'
+)
+pessoas$insert(jsonObject)
+```
+
+```{r}
+pessoas$find()
+```
+
+```{r}
+pessoas$count()
+```
+
+```{r}
+pessoas$remove('{"idade": 23}')
+pessoas$count()
+```
+
+```{r}
+jsonObject <- c(
+    '{"nome": "Bill"}',
+    '{"nome": "Anna", "idade": 23}',
+    '{"nome": "José", "idade": 35}'
+)
+pessoas$insert(jsonObject)
+```
+
+```{r}
+pessoas$find()
+```
+
+```{r}
+pessoas$update(
+    '{"nome": "Bill"}', 
+    '{"$set": {"idade": 21}}'
+)
+```
+
+```{r}
+pessoas$find('{"nome": "Bill"}')
+```
+
